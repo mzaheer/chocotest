@@ -24,16 +24,46 @@ skip_commits:
 matrix:
   fast_finish: true
 
+#init:
+#  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
 install:
   - ps: Install-PackageProvider -Name NuGet -Force
   - ps: Install-Module PsScriptAnalyzer -Force
+
+hosts:
+  chocopackages.ise.com: 54.231.168.128
+
+nuget:
+  account_feed: true
+  project_feed: true
 
 #---------------------------------#
 #       build configuration       #
 #---------------------------------#
 
 before_build:
-  - ps: c:\projects\baremetal-windows-etcd\Analyze-Script.ps1
+  - ps: c:\projects\chocotest\Analyze-Script.ps1
 
 # run our custom scripts instead of automatic MSBuild
-build: off
+build_script:
+  - ps: c:\projects\chocotest\build.ps1
+
+#---------------------------------#
+#       tests configuration       #
+#---------------------------------#
+
+test_script:
+  - ps: c:\projects\chocotest\test.ps1
+
+
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+#---------------------------------#
+#      artifacts configuration    #
+#---------------------------------#
+
+artifacts:
+  - path: notepadplusplus\notepadplusplus*.nupkg
+    name: notepadplusplus
