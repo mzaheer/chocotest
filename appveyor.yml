@@ -1,0 +1,39 @@
+# Notes:
+#   - Minimal appveyor.yml file is an empty file. All sections are optional.
+#   - Indent each level of configuration with 2 spaces. Do not use tabs!
+#   - All section names are case-sensitive.
+#   - Section names should be unique on each level.
+
+#---------------------------------#
+#      general configuration      #
+#---------------------------------#
+
+# version format
+version: 1.0.{build}-{branch}
+
+skip_commits:
+  files:
+    - README.md
+
+#---------------------------------#
+#    environment configuration    #
+#---------------------------------#
+
+# this is how to allow failing jobs in the matrix
+# set this flag to immediately finish build once one of the jobs fails
+matrix:
+  fast_finish: true
+
+install:
+  - ps: Install-PackageProvider -Name NuGet -Force
+  - ps: Install-Module PsScriptAnalyzer -Force
+
+#---------------------------------#
+#       build configuration       #
+#---------------------------------#
+
+before_build:
+  - ps: c:\projects\baremetal-windows-etcd\Analyze-Script.ps1
+
+# run our custom scripts instead of automatic MSBuild
+build: off
