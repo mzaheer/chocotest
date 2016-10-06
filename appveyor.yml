@@ -24,8 +24,8 @@ skip_commits:
 matrix:
   fast_finish: true
 
-#init:
-#  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 install:
   - ps: Install-PackageProvider -Name NuGet -Force
@@ -47,23 +47,23 @@ before_build:
 
 # run our custom scripts instead of automatic MSBuild
 build_script:
-  - ps: c:\projects\chocotest\build.ps1
+  - ps: c:\projects\chocotest\Invoke-Build.ps1
 
 #---------------------------------#
 #       tests configuration       #
 #---------------------------------#
 
 test_script:
-  - ps: c:\projects\chocotest\test.ps1
+  - ps: c:\projects\chocotest\Invoke-Test.ps1
 
 
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#on_finish:
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 #---------------------------------#
 #      artifacts configuration    #
 #---------------------------------#
 
 artifacts:
-  - path: notepadplusplus\notepadplusplus*.nupkg
-    name: notepadplusplus
+  - path: '**\*.nupkg'
+    name: nupkgFile
