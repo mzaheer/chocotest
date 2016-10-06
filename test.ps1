@@ -1,25 +1,32 @@
+Set-Location -Path c:\projects\chocotest
+$changedFiles = git diff --name-only --diff-filter=ACMRTUXB origin/master..HEAD
+$nuspecFile = $changedFiles | Where-Object { $_ -like "*.nuspec" }
+
+If ($null -eq $nuspecFile) { Exit }
+
+$packageName = $nuspecFile.Split(".")[0]
+
+Write-Warning "Install MY $packageName"
 Add-AppveyorTest -Name "ChocoInstall" -Outcome Running
-Try {
-  Write-Warning "Install MY notepadplusplus"
-  Invoke-Expression "choco install notepadplusplus -Source \\$env:computername\chocotest"
-}
-Catch {
-  Update-AppveyorTest -Name "ChocoInstall" -Outcome Failed -ErrorMessage $Error[0].Exception.Message
+Invoke-Expression "choco install $packageName -Source \\$env:computername\chocotest" -ErrorVariable foo
+$Errors = $Error[0].Exception.Message
+If ($LastExitCode -eq 0) {
+  Update-AppveyorTest -Name "ChocoInstall" -Outcome Passed
+} Else {
+  $foo
+  Add-AppveyorMessage -Message "Choco install $packageName failed. Check the 'Tests' tab of this build for more details." -Category Warning
+  Update-AppveyorTest -Name "ChocoInstall" -Outcome Failed -ErrorMessage $foo
   Throw "Build failed"
-}
-Finally {
-  Update-AppveyorTest -Name "ChocoInstall" -Outcom Passed
 }
 
+
+Write-Warning "Uninstall MY $packageName"
 Add-AppveyorTest -Name "ChocoUnInstall" -Outcome Running
-Try {
-  Write-Warning "Uninstall MY notepadplusplus"
-  Invoke-Expression "choco uninstall notepadplusplus"
-}
-Catch {
+Invoke-Expression "choco uninstall $packageName"
+If ($LastExitCode -eq 0) {
+  Update-AppveyorTest -Name "ChocoUnInstall" -Outcome Passed
+} Else {
+  Add-AppveyorMessage -Message "Choco uninstall $packageName failed. Check the 'Tests' tab of this build for more details." -Category Warning
   Update-AppveyorTest -Name "ChocoUnInstall" -Outcome Failed -ErrorMessage $Error[0].Exception.Message
   Throw "Build failed"
-}
-Finally {
-  Update-AppveyorTest -Name "ChocoUnInstall" -Outcom Passed
 }
