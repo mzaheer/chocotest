@@ -9,6 +9,17 @@ If ($null -eq $nuspecFile) { Exit }
 $packageName = $nuspecXML.package.metadata.id
 
 Write-Output ""
+Write-Warning "TEST: PackageName"
+Add-AppveyorTest -Name "PackageName" -Outcome Running
+If ($packageName -ceq $nuspecFile.Split('/')[0]) {
+  Update-AppveyorTest -Name "PackageName" -Outcome Passed
+} Else {
+  Add-AppveyorMessage -Message "PackageName test failed. Check the 'Tests' tab of this build for more details." -Category Warning
+  Update-AppveyorTest -Name "PackageName" -Outcome Failed -ErrorMessage "The packageName must match the package folder name (CASE MATTERS).`n`rPackageName: $packageName --- FolderName: $($nuspecFile.Split('/')[0])"
+  Throw "Build failed"
+}
+
+Write-Output ""
 Write-Warning "TEST: Choco Install $packageName"
 Add-AppveyorTest -Name "ChocoInstall" -Outcome Running
 choco install $packageName -Source $projectLocation
