@@ -33,7 +33,7 @@ $FailOnRules = $WarningRules | Where-Object { -not ($DoNotFailOnRules -contains 
 Add-AppveyorTest -Name "PsScriptAnalyzer" -Outcome Running
 
 $Results = Invoke-ScriptAnalyzer -Path (Get-Location) -Recurse -ErrorAction SilentlyContinue
-$Violations = $Results | Where-Object {($FailOnRules -contains $_.RuleName) -or ($_.Severity -eq 'Error')}
+$Violations = $Results | Where-Object {($FailOnRules.RuleName -contains $_.RuleName) -or ($_.Severity -eq 'Error')}
 
 If ($Violations) {
   $ViolationString = $Violations | Out-String
